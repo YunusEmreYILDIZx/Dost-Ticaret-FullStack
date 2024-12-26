@@ -1,0 +1,128 @@
+// config/db.config.js
+module.exports = {
+  HOST: "localhost",
+  USER: "your_username",
+  PASSWORD: "your_password",
+  DB: "your_database",
+  dialect: "postgres",
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+};
+
+// config/config.js
+const DB_CONFIG = require('./db.config.js');
+
+module.exports = {
+  development: {
+    username: DB_CONFIG.USER,
+    password: DB_CONFIG.PASSWORD,
+    database: DB_CONFIG.DB,
+    host: DB_CONFIG.HOST,
+    dialect: DB_CONFIG.dialect
+  },
+  test: {
+    username: DB_CONFIG.USER,
+    password: DB_CONFIG.PASSWORD,
+    database: DB_CONFIG.DB,
+    host: DB_CONFIG.HOST,
+    dialect: DB_CONFIG.dialect
+  },
+  production: {
+    username: DB_CONFIG.USER,
+    password: DB_CONFIG.PASSWORD,
+    database: DB_CONFIG.DB,
+    host: DB_CONFIG.HOST,
+    dialect: DB_CONFIG.dialect
+  }
+};
+
+// migrations/YYYYMMDDHHMMSS-create-user.js
+'use strict';
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Users', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      username: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      }
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('Users');
+  }
+};
+
+// models/index.js
+const { Sequelize } = require("sequelize");
+const DB_CONFIG = require("../config/db.config.js");
+
+const sequelize = new Sequelize(
+  DB_CONFIG.DB,
+  DB_CONFIG.USER,
+  DB_CONFIG.PASSWORD,
+  {
+    host: DB_CONFIG.HOST,
+    dialect: DB_CONFIG.dialect,
+    pool: {
+      max: DB_CONFIG.pool.max,
+      min: DB_CONFIG.pool.min,
+      acquire: DB_CONFIG.pool.acquire,
+      idle: DB_CONFIG.pool.idle,
+    },
+  }
+);
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Database connection established successfully.");
+  })
+  .catch((error) => {
+    console.error("Unable to connect to the database:", error);
+  });
+
+const db = {
+  sequelize,
+  Sequelize,
+};
+
+module.exports = db;
+
+// .sequelizerc
+const path = require('path');
+
+module.exports = {
+  'config': path.resolve('config', 'config.js'),
+  'models-path': path.resolve('models'),
+  'seeders-path': path.resolve('seeders'),
+  'migrations-path': path.resolve('migrations')
+};
